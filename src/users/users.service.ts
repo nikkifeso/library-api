@@ -5,7 +5,7 @@ import { UserDto } from './dto/user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Repository } from 'typeorm';
 import { toUserDto } from 'src/shared/mapper';
-import bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';;
 
 @Injectable()
 export class UsersService {
@@ -21,9 +21,18 @@ export class UsersService {
             throw new HttpException('User Already Exists', HttpStatus.BAD_REQUEST);
         }
 
-        const user: UserEntity = await this.userRepository.create({ username, password, email })
-        await this.userRepository.save(user);
-        return toUserDto(user);
+        const user: UserEntity = await this.userRepository.create({
+            username,
+            password,
+            email,
+        })
+        try {
+            await this.userRepository.save(user);
+            return toUserDto(user);
+  
+        } catch(error) {
+            console.log(error)
+        }
     }
 
     async findOne(options?: object): Promise<UserDto> {
@@ -53,7 +62,7 @@ export class UsersService {
     }
 
     async findByPayload({ username } : any): Promise<UserDto>{
-        return await this.findOne({ where: { username } })
+        return await this.userRepository.findOne({ where: { username } })
     }
 
 }

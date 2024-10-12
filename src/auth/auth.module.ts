@@ -3,8 +3,10 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from 'src/users/users.module';
 import { PassportModule } from '@nestjs/passport';
-import {JwtModule} from '@nestjs/jwt'
+import { JwtModule } from '@nestjs/jwt'
+import { JwtStrategy } from './jwt.strategy';
 
+require("dotenv").config();
 @Module({
   imports: [
     UsersModule,
@@ -14,9 +16,9 @@ import {JwtModule} from '@nestjs/jwt'
       session: false,
     }),
     JwtModule.register({
-      secret: process.env.SECRETKEY,
+      secret: process.env.SECRET_KEY,
       signOptions: {
-        expiresIn: process.env.EXPIRESIN,
+        expiresIn: process.env.EXPIRES_IN,
       }
   })],
   controllers: [AuthController],
