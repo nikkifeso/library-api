@@ -4,6 +4,8 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { BookEntity } from './entities/book.entity';
 import { Repository } from 'typeorm';
+import { UserDto } from 'src/users/dto/user.dto';
+import { UsersService } from 'src/users/users.service';
 
 
 @Injectable()
@@ -11,6 +13,7 @@ export class BooksService {
   constructor(
     @InjectRepository(BookEntity)
     private readonly bookRepository: Repository<BookEntity>,
+    private readonly usersService: UsersService,
   ) { }
   
   //Separate into helper function
@@ -29,10 +32,12 @@ export class BooksService {
     }
   }
 
-  async create(
+  async create({username}: UserDto,
     CreateBookDto: CreateBookDto,
   ): Promise<BookEntity> {
-    const bookData = await this.bookRepository.create(CreateBookDto);
+    const { title, author, year_published } = CreateBookDto;
+    const owner = await this.usersService.findOne({ where: { username } });
+    const bookData: BookEntity = await this.bookRepository.create({title, author, year_published});
     return this.bookRepository.save(bookData);
   }
 

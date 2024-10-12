@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import NotFoundError from 'src/exceptions/not-found.exception';
+import { AuthGuard } from '@nestjs/passport';
 
 
 @Controller('books')
@@ -16,10 +17,12 @@ export class BooksController {
   }
 
   @Post()
+  @UseGuards(AuthGuard())
   async create(
-    @Body() createBookDto: CreateBookDto) {
+    @Body() createBookDto: CreateBookDto, @Req() req: any) {
+    const user = req.body.user
     try {
-      await this.booksService.create(createBookDto)
+      await this.booksService.create(user, createBookDto)
       return {
         success: true,
         message: 'Book Created Successfully',
@@ -69,7 +72,10 @@ export class BooksController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
+  @UseGuards(AuthGuard())
+  async update(
+    @Param('id') id: string,
+    @Body() updateBookDto: UpdateBookDto) {
     try {
       const data = await this.booksService.update(id, updateBookDto);
       return {
@@ -83,12 +89,13 @@ export class BooksController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard())
   async remove(@Param('id') id: string) {
     try {
       await this.booksService.remove(id);
       return {
         success: true,
-        message: 'User Deleted Successfully',
+        message: 'Book Deleted Successfully',
       };
     } catch (error) {
       throw new NotFoundError('Book', id);
